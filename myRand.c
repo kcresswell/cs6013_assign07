@@ -21,6 +21,7 @@ static struct cdev cdev; //the device
 static unsigned char state[256];
 static int rci;
 static int rcj;
+static spinlock_t myLock = __SPIN_LOCK_UNLOCKED();
 /*
 
 DEFINE ALL YOUR RC4 STUFF HERE
@@ -76,12 +77,14 @@ ssize_t myRand_read(struct file *filp, char __user *buf, size_t count, loff_t *f
 
 */      
 	unsigned char* keystream; 
-	int i; 
+        spin_lock(&myLock);
 
 	printk("Value of count before: %d" + count); 
 	//allocate space for the keystream in the kernel
 	keystream = (unsigned char*) kmalloc(sizeof(char) * count, GFP_KERNEL);
 	//store the RC4 val to the keystream
+	
+	int i; 
 	for(i = 0; i < count; i++){
 	   keystream[i] = rc4Next();
 	}
@@ -100,6 +103,8 @@ ssize_t myRand_read(struct file *filp, char __user *buf, size_t count, loff_t *f
 	}
         printk("\n");
 
+	spin_unlock(&myLock);
+
 	return 0;
 }
 
@@ -112,6 +117,7 @@ ssize_t myRand_write(struct file*filp, const char __user *buf, size_t count, lof
 	unsigned char* key; 
 	key = (unsigned char*) kmalloc(count, GFP_KERNEL);
 
+	spin_lock(&myLock);
 	//null ptr check
 	if(!key){
 	  return -ENOMEM; //out of memory check
@@ -131,6 +137,7 @@ ssize_t myRand_write(struct file*filp, const char __user *buf, size_t count, lof
 	//free the memory
 	kfree(key); 
        
+	spin_unlock(&myLock);
 	//count is the num of bytes written to the file
         return count;
 }

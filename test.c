@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
      int ret, fd; 
      unsigned char buff1[BUFFER_SIZE];
      unsigned char buff2[BUFFER_SIZE];
-     unsigned char key[5] = "abcde"; 
+     unsigned char key[5] = "hello"; 
 
      printf("Testing stuff..."); 
 	
@@ -31,10 +31,20 @@ int main(int argc, char **argv) {
        perror("Device failed to open :'(");
        return errno;
      }
-	
-     printf("Keystream for RC4: [%s].\n", key);
+//need to make a loop to print out each char rather than a string, same with strlen issue
 
-     printf("Test size strlen in write: %lu\n", strlen(key));
+     printf("Keystream: "); 
+     for(int i = 0; i < 5; i++){
+        printf("%c", key[i]);
+     
+      }
+     printf("\n");      
+     //printf("Keystream for RC4: [%s].\n", key);
+
+    // printf("Test size strlen in write: %lu\n", strlen(key));
+    printf("Size of key array: %lu ", sizeof(key));
+    printf("\n"); 
+
      ret = write(fd, key, strlen(key));
      if(ret < 0){
 	     perror("Failed to write the message"); 
@@ -48,22 +58,20 @@ int main(int argc, char **argv) {
      ret = read(fd, buff2, 10);
      printStuff(buff1, 10);
      printStuff(buff2, 10);
+
      /*
       * * RC4 Reinitialize Test
-      * *  * Returns same result each time it is read */
-
+      * *  * Returns same result each time it is read 
+      
      printf("Reinitialize Test, should print the same value in buff1 and buff2\n"); 
      ret = write(fd, key, strlen(key)); 
-
      ret = read(fd, buff1, 10); 
-	
      ret = write(fd, key, strlen(key));
-
      ret = read(fd, buff2, 10);
-
      //print stuff
      printStuff(buff1, 10); 
      printStuff(buff2, 10); 
+     */
 
      return 1; 
 }
